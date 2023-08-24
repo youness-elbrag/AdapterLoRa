@@ -1,2 +1,2 @@
-Loralib
-loratorch
+git+https://github.com/Baijiong-Lin/LoRA-Torch
+git+https://github.com/microsoft/LoRA

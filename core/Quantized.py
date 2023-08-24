@@ -1,7 +1,7 @@
 import loratorch as LoraT
 import torch.nn as nn
 import loralib as lora
-from utils import make_lora_replace
+from .utils import make_lora_replace
 
 class CastOutputToFloat(nn.Module):
     def forward(self, x):
@@ -100,7 +100,7 @@ class AdapterLoRa(nn.Module):
             make_lora_replace(self.model, self.lora_layer, self.Rank, self.layer)
             return "Model successfully reconstructed with LoRA-adapted layers"
 
-    def implement_lora(self):
+    def implement_lora(self,verbose=False):
         """
         Implement LoRA adaptation on the model.
 
@@ -108,11 +108,13 @@ class AdapterLoRa(nn.Module):
             nn.Module: The model with LoRA adaptation applied.
         """
         total_trainable_params_before = sum(p.numel() for p in self.model.parameters() if p.requires_grad)
-        print(f"Total trainable parameters before LoRA: {total_trainable_params_before}")
+        if verbose == True:
+            print(f"Total trainable parameters before LoRA: {total_trainable_params_before}")
 
         self.LoRa.mark_only_lora_as_trainable(self.model)
 
         total_trainable_params_after = sum(p.numel() for p in self.model.parameters() if p.requires_grad)
-        print(f"Total trainable parameters after LoRA: {total_trainable_params_after}")
+        if verbose == True:
+            print(f"Total trainable parameters after LoRA: {total_trainable_params_after}")
 
         return self.model
