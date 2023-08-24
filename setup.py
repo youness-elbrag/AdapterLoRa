@@ -18,7 +18,7 @@ ENV:
 
 setuptools.setup(
     name="AdapterLoRa",
-    version="1.1.3",
+    version="1.1.4",
     author="Youness EL BRAG",
     author_email="younsselbrag@gmail.com",
     description="A Tool for adaptation Larger Transfomer-Based model and Quantization built top on libraries LoRa and LoRa-Torch.",
