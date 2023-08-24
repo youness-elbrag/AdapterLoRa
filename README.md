@@ -12,6 +12,11 @@
 
 If the last 6 months of AI research felt like a decade to you, you are not alone! With a new Large Language Model (LLM) released every other week, it has been challenging to keep up with the current pace of innovation in AI. While there many LLM model which not Non-Hungging Face model Hard to Quantize the model if realsed as Pre-trianed model , Adapter-LoRa is Tool help to Assign **nn.LInear-** to LoRa Linear Decompsition 
 
+### Instalation 
+
+```python
+pip install AdapterLoRa
+```
 
 ### Usage Tool AdpaterLoRa
 
