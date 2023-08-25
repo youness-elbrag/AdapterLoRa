@@ -1,2 +1,4 @@
-loratorch @ git+https://github.com/Baijiong-Lin/LoRA-Torch#egg==loratorch
+loratorch @ git+https://github.com/Baijiong-Lin/LoRA-Torch#egg=loratorch
 loralib
+
+

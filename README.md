@@ -1,7 +1,7 @@
 # Adapter-LoRa for Quantization  
 
 <div align="center">
-  <img src="assets/LoRa.png" alt="Nano-AutoGrad Logo" width="200">
+  <img src="assets/LoRa.png" alt="LoRa-Logo" width="200">
 
 [![Made With Love](https://img.shields.io/badge/Made%20With-Love-orange.svg)](https://github.com/youness-elbrag/AdapterLoRa/)
 [![GitHub issues](https://img.shields.io/github/issues/kyegomez/Med-Palm)](https://github.com/youness-elbrag/AdapterLoRa/issues) 
