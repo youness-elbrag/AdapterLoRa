@@ -28,8 +28,8 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     keywords = ['Quantization', 'AdapterLLM', 'PEFT'],   # Keywords that define your package best
     install_requires=[            # I get to this in a second
-          'git+https://github.com/Baijiong-Lin/LoRA-Torch',
-          'git+https://github.com/microsoft/LoRA',
+          'LoRA-Torch @ git+https://github.com/Baijiong-Lin/LoRA-Torch',
+          'LoRA @ git+https://github.com/microsoft/LoRA',
       ],
     classifiers=[
     'Development Status :: 4 - Beta',      # Chose either "3 - Alpha", "4 - Beta" or "5 - Production/Stable" as the current state of your package
