@@ -1,2 +1,2 @@
-git+https://github.com/Baijiong-Lin/LoRA-Torch
-git+https://github.com/microsoft/LoRA
+LoRA-Torch @ git+https://github.com/Baijiong-Lin/LoRA-Torch
+loralib
