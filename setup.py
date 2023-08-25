@@ -23,13 +23,12 @@ ENV:
 with pathlib.Path('requirements.txt').open() as requirements_txt:
     install_requires = [
         str(requirement)
-        for requirement
-        in pkg_resources.parse_requirements(requirements_txt)
+        for requirement in pkg_resources.parse_requirements(requirements_txt)
     ]
 
 setuptools.setup(
     name="AdapterLoRa",
-    version="1.1.5",
+    version="2.0.0",
     author="Youness EL BRAG",
     author_email="younsselbrag@gmail.com",
     description="A Tool for adaptation Larger Transfomer-Based model and Quantization built top on libraries LoRa and LoRa-Torch.",
@@ -38,9 +37,9 @@ setuptools.setup(
     url="https://github.com/youness-elbrag/AdapterLoRa/",
     packages=setuptools.find_packages(),
     keywords = ['Quantization', 'AdapterLLM', 'PEFT'],   # Keywords that define your package best
-    install_requires= install_requires,
+    install_requires=install_requires,
     classifiers=[
-    'Development Status :: 4 - Beta',      # Chose either "3 - Alpha", "4 - Beta" or "5 - Production/Stable" as the current state of your package
+    'Development Status :: 3 - Alpha',      # Chose either "3 - Alpha", "4 - Beta" or "5 - Production/Stable" as the current state of your package
     'Intended Audience :: Developers',      # Define that your audience are developers
     'Topic :: Software Development :: Build Tools',
     'License :: OSI Approved :: MIT License',   # Again, pick a license
