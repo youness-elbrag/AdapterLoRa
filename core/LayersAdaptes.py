@@ -25,7 +25,7 @@ def Layer(model, new_layer):
 
     return new_layer
 
-@Adapters(layertyep)
+@Adapters(LAYERS)
 def LoRaLinear(method: str, model: nn.Module, Rank: Optional[int], threshold: Optional[int]):
     """
     Replace a linear layer with a quantized layer using specified method.
@@ -73,7 +73,7 @@ def LoRaLinear(method: str, model: nn.Module, Rank: Optional[int], threshold: Op
     else:
         raise ValueError(f"Unsupported method or invalid method name: {method}")
 
-@Adapters(layertyep)
+@Adapters(LAYERS)
 def LoRaEmbedding(
     method: str,
     model: nn.Module,

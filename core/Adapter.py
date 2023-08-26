@@ -1,38 +1,50 @@
-import bitsandbytes as bnb
-import loratorch as LoraT
-import loralib as lora
-import torch.nn as nn 
-from typing import dict , Optional , Union
+from typing import List, Optional
+import torch.nn as nn
 
+class Adapters:
+    def __init__(self, layer_type: List[str]):
+        """
+        Initialize an Adapters object with a list of supported layer types.
 
-
-
-class Adapters(object):
-    
-    def __init__(self, layerTyep:list, Method:func)-> nn.Module:
-        self.layer = layerTyep
+        Args:
+            layer_type (List[str]): List of supported layer types.
+        """
+        self.layer_type = layer_type
 
     @staticmethod
-    def LayerType(self , layer):
-        layers = ["nn.Linear" , "nn.Embedding", "nn.Conv1d","nn.Conv2d"]
-        AdaptedLayer = []
-        for i in layer:
-            for j in layers:
-                if layer[i] == layers[j]:
-                    AdaptedLayer.append(layer[i])
-            return f"{layers[i]} not support Please Visit \n Docs to list correct Layer support"
-        return AdaptedLayer
+    def layer_type_check(layer: str) -> bool:
+        """
+        Check if a given layer type is supported.
+
+        Args:
+            layer (str): The layer type to check.
+
+        Returns:
+            bool: True if the layer type is supported, False otherwise.
+        """
+        layers = ["nn.Linear", "nn.Embedding", "nn.Conv1d", "nn.Conv2d"]
+        return layer in layers
 
     def __call__(self, fn):
-        if self.LayerType(self.layer):
-            def __fn():
-                print(f"Layers to adjusted Used AdapterLoRa: {[layer for layer in self.layer]}")
-                print("Adapter Applied:", fn.__name__)        
+        """
+        Decorator to apply an adapter function to specified layers.
+
+        Args:
+            fn (Callable): The adapter function to be applied.
+
+        Returns:
+            Callable: Decorated function with adapter applied.
+        """
+        def decorated_fn():
+            if all(self.layer_type_check(layer) for layer in self.layer_type):
+                print(f"Layers to be adjusted using AdapterLoRa: {self.layer_type}")
+                print("Adapter Applied:", fn.__name__)
                 fn()
-            return __fn
+            else:
+                print("Some layer types are not supported.")
+        return decorated_fn
 
 
-
-class Optimzer:
-    def __init__(self, Optimzer: nn.Module):
-        pass
+class Optimizer:
+    def __init__(self, optimizer: nn.Module):
+        pass  # You can add initialization logic here

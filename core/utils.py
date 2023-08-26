@@ -1,41 +1,55 @@
 import torch.nn as nn
-from typing import Optional, Callable
+from typing import Optional
+from .Adapter import Adapters
 
-def quantize_layer(method,layer, quantize_fn, quantize_fn_, Rank):
+def quantize_layer(**kwargs):
     """
     Apply the appropriate quantization function to the given layer.
 
     Args:
-        layer (nn.Module): The layer to be quantized.
-        quantize_fn (Callable): The function to quantize a linear layer.
-        quantize_fn_ (Callable): The function to quantize an embedding layer.
-        Rank (int): The rank parameter for LoRA adaptation.
+        **kwargs: Dictionary containing the quantization parameters.
 
     Returns:
         nn.Module: The quantized layer.
     """
-    if isinstance(layer, nn.Linear) and quantize_fn is not None:
-        return quantize_fn(
-        method, 
-        model, 
-        Rank, 
-        threshold
-        )
-    elif isinstance(layer, nn.Embedding) and quantize_fn_ is not None:
-        return quantize_fn_(
-            method,
-            model,
-            Rank,
-            lora_alpha,
-            scale_grad_by_freq,
-            padding_idx,
-            max_norm
-                    )
-    else:
-        return layer
+    method = kwargs["method"]
+    model = kwargs["model"]
+    Rank = kwargs.get("Rank")
+    lora_alpha = kwargs.get("lora_alpha")
+    scale_grad_by_freq = kwargs.get("scale_grad_by_freq")
+    padding_idx = kwargs.get("padding_idx")
+    max_norm = kwargs.get("max_norm")
+    threshold = kwargs.get("threshold")
+
+    if isinstance(model, nn.Linear):
+        quantize_fn = kwargs["quantize_fn"]
+        if quantize_fn is not None:
+            return quantize_fn(
+                method=method,
+                model=model,
+                Rank=Rank,
+                **kwargs
+            )
+
+    elif isinstance(model, nn.Embedding):
+        quantize_fn_ = kwargs["quantize_fn_"]
+        if quantize_fn_ is not None:
+            return quantize_fn_(
+                method=method,
+                model=model,
+                Rank=Rank,
+                lora_alpha=lora_alpha,
+                scale_grad_by_freq=scale_grad_by_freq,
+                padding_idx=padding_idx,
+                max_norm=max_norm,
+                **kwargs
+            )
+
+    return model
+
 
 def make_lora_replace(
-    model, method:str ,LayerType, quantize_fn=None, quantize_fn_=None, Rank=0, layers=None,
+    model, method: str, LayerType, quantize_fn=None, quantize_fn_=None, Rank=0, layers=None,
     depth=1, path="", verbose=True
 ):
     """
@@ -64,26 +78,25 @@ def make_lora_replace(
         if verbose:
             print(f"Found linear layer to quantize: {path}", type(model))
         if quantize_fn is not None:
-            return quantize_fn( 
-                method, 
-                model, 
-                Rank, 
-                threshold
-                )
+            return quantize_fn(
+                method=method,
+                model=model,
+                Rank=Rank
+            )
 
     if LayerType[1] in AdaptersLayer and isinstance(model, nn.Embedding) and any(item in path for item in layers):
         if verbose:
             print(f"Found embedding layer to quantize: {path}", type(model))
         if quantize_fn_ is not None:
             return quantize_fn_(
-                method,
-                model,
-                Rank,
-                lora_alpha,
-                scale_grad_by_freq,
-                padding_idx,
-                max_norm
-                 )
+                method=method,
+                model=model,
+                Rank=Rank,
+                lora_alpha=lora_alpha,
+                scale_grad_by_freq=scale_grad_by_freq,
+                padding_idx=padding_idx,
+                max_norm=max_norm
+            )
 
     for key, module in model.named_children():
         if isinstance(module, (nn.Linear, nn.Embedding)) and any(item in path for item in layers):
@@ -94,14 +107,14 @@ def make_lora_replace(
         elif isinstance(module, (nn.ModuleList, nn.ModuleDict)):
             for i, elem in enumerate(module):
                 layer = make_lora_replace(
-                    elem, LayerType, quantize_fn, quantize_fn_, Rank, layers,
+                    elem, method, LayerType, quantize_fn, quantize_fn_, Rank, layers,
                     depth + 1, f"{path}:{key}[{i}]", verbose=verbose
                 )
                 if layer is not None:
                     module[i] = layer
         else:
             layer = make_lora_replace(
-                module, LayerType, quantize_fn, quantize_fn_, Rank, layers,
+                module, method, LayerType, quantize_fn, quantize_fn_, Rank, layers,
                 depth + 1, f"{path}:{key}", verbose=verbose
             )
             if layer is not None:
