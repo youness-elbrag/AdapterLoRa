@@ -1,6 +1,6 @@
-import loratorch as LoraT
 import torch.nn as nn
-import loralib as lora
+from .LayersAdaptes import *
+from .Adapter import Adapters
 from .utils import make_lora_replace
 
 class CastOutputToFloat(nn.Module):
@@ -8,7 +8,7 @@ class CastOutputToFloat(nn.Module):
         return x.to(torch.float32)
 
 class AdapterLoRa(nn.Module):
-    def __init__(self, model: nn.Module, method: str, Rank: int):
+    def __init__(self, model: nn.Module,LoRa=None,BitSand=None, method: str, Rank: int):
         """
         AdapterLoRa constructor.
 
@@ -18,15 +18,17 @@ class AdapterLoRa(nn.Module):
             Rank (int): The rank parameter for LoRA adaptation.
         """
         super(AdapterLoRa, self).__init__()
+            
 
-        self.methods = {"LoRa": lora, "LoRaTorch": LoraT}
+        self.Adapters = ["LoRa","SandBytes","LoRaTorch"]
         self.Rank = Rank
-        self.LORA = True
+        self.LORA = LoRa
+        self.BITSAND = BitSand
         self.model = model
         self.layer = []
 
-        if method in self.methods:
-            self.LoRa = self.methods[method]
+        if method in self.Adapters:
+            self.method = self.Adapters[method]
         else:
             raise ValueError("Invalid method provided")
 
@@ -42,31 +44,6 @@ class AdapterLoRa(nn.Module):
         """
         self.layer.append(layer)
         return self.layer
-
-    def lora_layer(self, layer, Rank):
-        """
-        Create a LoRA adapted layer.
-
-        Args:
-            layer (nn.Module): The layer to adapt.
-            Rank (int): The rank parameter for LoRA adaptation.
-
-        Returns:
-            nn.Module: The adapted layer.
-        """
-        new_layer = self.LoRa.Linear(
-            in_features=layer.in_features,
-            out_features=layer.out_features,
-            bias=layer.bias is not None,
-            r=Rank
-        )
-
-        new_layer.weight = nn.Parameter(layer.weight.detach().clone())
-
-        if layer.bias is not None:
-            new_layer.bias = nn.Parameter(layer.bias.detach().clone())
-
-        return new_layer
 
     def freeze_weights(self, weight_freeze=False):
         """

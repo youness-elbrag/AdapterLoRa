@@ -63,9 +63,9 @@ where $x\in\mathbb{R}^{k\times n}$ is the input matrix, $W_0\in\mathbb{R}^{m\tim
 
 1. Install ``AdapterLoRa``.
    
-   ```bash
+  ```bash
    pip install git+https://github.com/Baijiong-Lin/LoRA-Torch
-   ```
+  ```
 
   ```python
   pip install AdapterLoRa
