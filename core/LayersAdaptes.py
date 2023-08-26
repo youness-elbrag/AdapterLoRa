@@ -1,12 +1,23 @@
-import loralib as LoRa 
-import loratorch as LoRaT
 import torch.nn as nn
+import bitsandbytes as bnb
+import loralib as LoRa
+import loratorch as LoRaT
 from typing import Optional
-import bitsandbytes as nn 
+from .Quantized import AdapterLoRa
 
-
+LAYERS = AdapterLoRa.layertyep
 
 def Layer(model, new_layer):
+    """
+    Copy weights and biases from the original layer to the new layer.
+
+    Args:
+        model (nn.Module): The original layer.
+        new_layer (nn.Module): The new layer.
+
+    Returns:
+        nn.Module: The new layer with copied weights and biases.
+    """
     new_layer.weight = nn.Parameter(model.weight.detach().clone())
 
     if model.bias is not None:
@@ -14,77 +25,111 @@ def Layer(model, new_layer):
 
     return new_layer
 
-def LoRaLinear(method:str, model:nn.Module, Rank:Optional[int],threshold:Optional[int]):
-    Adapters = ["LoRa","SandBytes","LoRaTorch"]
-    if Adapters.__contains__(Adapters) == True:
+@Adapters(layertyep)
+def LoRaLinear(method: str, model: nn.Module, Rank: Optional[int], threshold: Optional[int]):
+    """
+    Replace a linear layer with a quantized layer using specified method.
+
+    Args:
+        method (str): The quantization method ("LoRa", "SandBytes", "LoRaTorch").
+        model (nn.Module): The input model containing the linear layer.
+        Rank (Optional[int]): The rank parameter for LoRA adaptation.
+        threshold (Optional[int]): The threshold parameter for SandBytes adaptation.
+
+    Returns:
+        nn.Module: The modified model with the quantized layer.
+    """
+    Adapters = ["LoRa", "SandBytes", "LoRaTorch"]
+
+    if method in Adapters:
         if method == "LoRa":
             new_layer = LoRa.Linear(
-                                in_features=model.in_features,
-                                out_features=model.out_features,
-                                bias=model.bias is not None,
-                                r=Rank
+                in_features=model.in_features,
+                out_features=model.out_features,
+                bias=model.bias is not None,
+                r=Rank
             )
-            return Layer(model . new_layer)
+            return Layer(model, new_layer)
 
         if method == "SandBytes":
             new_layer = bnb.nn.Linear8bitLt(
                 model.in_features,
-                model.out_featuresm2, 
-                bias=model.bias is not None, 
-                has_fp16_weights=False, 
-                threshold=6.0
-                )
-            return Layer(model . new_layer)
+                model.out_features,
+                bias=model.bias is not None,
+                has_fp16_weights=False,
+                threshold=threshold
+            )
+            return Layer(model, new_layer)
 
-
-        if method == "LoRaTorch": 
+        if method == "LoRaTorch":
             new_layer = LoRaT.Linear(
-                                in_features=model.in_features,
-                                out_features=model.out_features,
-                                bias=model.bias is not None,
-                                r=Rank
-                                        )
-            return Layer(model . new_layer)
+                in_features=model.in_features,
+                out_features=model.out_features,
+                bias=model.bias is not None,
+                r=Rank
+            )
+            return Layer(model, new_layer)
 
     else:
-        raise ValueError(f"there's no method support yet or may you inster invalide name method {method}")
+        raise ValueError(f"Unsupported method or invalid method name: {method}")
 
+@Adapters(layertyep)
+def LoRaEmbedding(
+    method: str,
+    model: nn.Module,
+    Rank: Optional[int],
+    lora_alpha: Optional[int],
+    scale_grad_by_freq: Optional[int],
+    padding_idx: Optional[int],
+    max_norm: Optional[int]
+):
+    """
+    Replace an embedding layer with a quantized layer using specified method.
 
-def LoRaEmbedding(method:str,
-     model:nn.Module , 
-     Rank:Optional[int], 
-     lora_alpha:Optional[int],
-     scale_grad_by_freq:Optional[int],
-     padding_idx:Optional[int],
-     max_norm:Optional[int]):
+    Args:
+        method (str): The quantization method ("LoRa", "SandBytes", "LoRaTorch").
+        model (nn.Module): The input model containing the embedding layer.
+        Rank (Optional[int]): The rank parameter for LoRA adaptation.
+        lora_alpha (Optional[int]): The alpha parameter for LoRA adaptation.
+        scale_grad_by_freq (Optional[int]): The scale_grad_by_freq parameter for LoRA adaptation.
+        padding_idx (Optional[int]): The padding_idx parameter for LoRA adaptation.
+        max_norm (Optional[int]): The max_norm parameter for LoRA adaptation.
 
-    Adapters = ["LoRa","SandBytes","LoRaTorch"]
-    if Adapters.__contains__(Adapters) == True:
+    Returns:
+        nn.Module: The modified model with the quantized layer.
+    """
+    Adapters = ["LoRa", "SandBytes", "LoRaTorch"]
+
+    if method in Adapters:
         if method == "LoRa":
-            new_layer = LoRa.Embedding(model.num_embeddings, 
-                        model.embedding_dim, 
-                        r=Rank,
-                        lora_alpha=lora_alpha,
-                        max_norm=model.max_norm is not None,
-                        scale_grad_by_freq=model.scale_grad_by_freq is not None,
-                        padding_idx=model.padding_idx is not None
-                )
+            new_layer = LoRa.Embedding(
+                model.num_embeddings,
+                model.embedding_dim,
+                r=Rank,
+                lora_alpha=lora_alpha,
+                max_norm=model.max_norm is not None,
+                scale_grad_by_freq=model.scale_grad_by_freq is not None,
+                padding_idx=model.padding_idx is not None
+            )
             return new_layer
 
         if method == "SandBytes":
-            new_layer=  bnb.nn.StableEmbedding(model.num_embeddings, 
-                        model.embedding_dim ) 
+            new_layer = bnb.nn.StableEmbedding(
+                model.num_embeddings,
+                model.embedding_dim
+            )
             return new_layer
 
         if method == "LoRaTorch":
-            new_layer = LoRaT.Embedding(model.num_embeddings, 
-                        model.embedding_dim, 
-                        r=Rank,
-                        max_norm=model.max_norm is not None,
-                        scale_grad_by_freq=model.scale_grad_by_freq is not None,
-                        padding_idx=model.padding_idx is not None
-                )
+            new_layer = LoRaT.Embedding(
+                model.num_embeddings,
+                model.embedding_dim,
+                r=Rank,
+                max_norm=model.max_norm is not None,
+                scale_grad_by_freq=model.scale_grad_by_freq is not None,
+                padding_idx=model.padding_idx is not None
+            )
             return new_layer
-    else:
-        raise ValueError(f"there's no method support yet or may you inster invalide name method {method}")
 
+    else:
+        raise ValueError(f"Unsupported method or invalid method name: {method}")

@@ -10,36 +10,50 @@
 </div>
 
 
-### Features
+## Features
 
-**Distinguishing the "loralib" and "loratorch" Approaches for Implementation**
+- **LoRALib Approach**: This approach involves calculating the computations `xW_0^T` and `x(BA)^T` separately, followed by their summation. This approach is particularly suitable for linear layers and offers accurate computation of LoRA-enhanced layers.
 
-The implementations of "loralib" and "loratorch" exhibit distinct methodologies, particularly when using the example of `nn.Linear`. The underlying mathematical representations are as follows:
+- **LoRATorch Approach**: In this approach, the pre-trained weight `W_0` is merged with its LoRA weight `BA`, resulting in the combined weight matrix `(W_0 + \frac{\alpha}{r} BA)`. This approach allows for the straightforward extension of LoRA to more complex and non-linear layers within the PyTorch ecosystem.
 
-1. **LoRa** Approaches
+## Mathematical Formulation
 
-  The computation is defined as:
+1. **LoRALib Approach**:
 
-  $h = x W_0^\top + \frac{\alpha}{r} x(BA)^\top,$
-
-  $where:
-  - `x` is an input matrix of dimensions \(k \times n\),
-  - `W_0` is a pre-trained weight matrix of dimensions \(m \times n\),
-  - `r` is a predefined LoRA rank,
-  - `B` and `A` are LoRA matrices of dimensions \(m \times r\) and \(r \times n\) respectively,
-  - `\alpha` is a hyper-parameter.$
-
-
-1. For ``loralib``,
-   $h = x W_0^\top + \frac{\alpha}{r} x(BA)^\top,$
-
-where $x\in\mathbb{R}^{k\times n}$ is the input matrix, $W_0\in\mathbb{R}^{m\times n}$ is the pre-trained weight matrix, $r$ is the predefined LoRA rank, $B\in\mathbb{R}^{m\times r}$ and $A\in \mathbb{R}^{r\times n}$ are the LoRA matrixes, and $\alpha$ is a hyper-parameter.
-
-2. For ``loratorch``,
-   $h = x (W_0 + \frac{\alpha}{r} BA)^\top.$
+   The computation is defined as:
    
-``loralib`` computes $xW_0^\top$ and $x(BA)^\top$ respectively and then merges the results. 
-While ``loratorch`` merges pre-trained weight $W_0$ and its LoRA weight $BA$ and then computes the results by simply using ``nn.Linear.forward()``. There is no difference between ``loralib`` and ``loratorch`` in the linear layers. But in some no-linear or complex layers, we are no sure whether this layer satisfies $L(x, W_0)+L(x, BA) = L(x, W_0+BA)$. Hence, it is difficult to extend LoRA to some complex layers by using ``loralib``. On the contrary, the idea of merging weights first in ``loratorch`` is more general and extensible. You just call ``merge_lora_param()`` in ``loratorch`` to merge weights and then call ``forward()`` in the original layer to compute the results. With the help of ``loratorch``, you can easily implement LoRA to any type of layer of ``torch.nn``.
+   $\( h = xW_0^T + \frac{\alpha}{r} x(BA)^T \)$
+
+   $where:
+   - \( x \) is the input matrix of dimensions \( k \times n \),
+   - \( W_0 \) is a pre-trained weight matrix of dimensions \( m \times n \),
+   - \( r \) is a predefined LoRA rank,
+   - \( B \) and \( A \) are LoRA matrices of dimensions \( m \times r \) and \( r \times n \) respectively,
+   - \( \alpha \) is a hyper-parameter.$
+
+2. **LoRATorch Approach**:
+
+   The computation is defined as:
+   
+   $\( h = x(W_0 + \frac{\alpha}{r} BA)^T \)$
+   
+   $where:
+   - \( x \) is the input matrix of dimensions \( k \times n \),
+   - \( W_0 \) is a pre-trained weight matrix of dimensions \( m \times n \),
+   - \( r \) is a predefined LoRA rank,
+   - \( B \) and \( A \) are LoRA matrices of dimensions \( m \times r \) and \( r \times n \) respectively,
+   - \( \alpha \) is a hyper-parameter.$
+
+## Usage
+
+1. **AdapterLoRa Class**: The `AdapterLoRa` class provides a versatile interface for applying LoRA adaptation to neural networks. It supports both `loralib` and `loratorch` approaches, offering the ability to reconstruct and implement LoRA-adapted models.
+
+2. **Adapting Layers**: The `add_layer_and_Instance_Layer` method allows you to specify the layers you want to adapt using the `layertyep` and `layer` parameters. This method helps tailor the LoRA application to specific layers in your model.
+
+3. **Freezing Weights**: The `freeze_weights` method enables the option to freeze model weights, enhancing stability and allowing for safer adaptations.
+
+4. **Reconstructing and Implementing LoRA**: The `reconstruct_model` method applies LoRA adaptation to the model, while the `implement_lora` method further implements LoRA and manages trainable parameters.
+.
 
 ## Supported Layers
 
