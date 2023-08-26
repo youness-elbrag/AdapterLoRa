@@ -10,26 +10,24 @@
 </div>
 
 
-## Comparative Features of "loralib" and "loratorch" Implementations
+### Features
 
 **Distinguishing the "loralib" and "loratorch" Approaches for Implementation**
 
 The implementations of "loralib" and "loratorch" exhibit distinct methodologies, particularly when using the example of `nn.Linear`. The underlying mathematical representations are as follows:
 
-1. * **loralib** Approach
+1. **LoRa** Approaches
 
   The computation is defined as:
 
-  \[
-  h = x W_0^\top + \frac{\alpha}{r} x(BA)^\top,
-  \]
+  $h = x W_0^\top + \frac{\alpha}{r} x(BA)^\top,$
 
-  where:
+  $where:
   - `x` is an input matrix of dimensions \(k \times n\),
   - `W_0` is a pre-trained weight matrix of dimensions \(m \times n\),
   - `r` is a predefined LoRA rank,
   - `B` and `A` are LoRA matrices of dimensions \(m \times r\) and \(r \times n\) respectively,
-  - `\alpha` is a hyper-parameter.
+  - `\alpha` is a hyper-parameter.$
 
 
 1. For ``loralib``,
@@ -40,7 +38,8 @@ where $x\in\mathbb{R}^{k\times n}$ is the input matrix, $W_0\in\mathbb{R}^{m\tim
 2. For ``loratorch``,
    $h = x (W_0 + \frac{\alpha}{r} BA)^\top.$
    
-``loralib`` computes $xW_0^\top$ and $x(BA)^\top$ respectively and then merges the results. While ``loratorch`` merges pre-trained weight $W_0$ and its LoRA weight $BA$ and then computes the results by simply using ``nn.Linear.forward()``. There is no difference between ``loralib`` and ``loratorch`` in the linear layers. But in some no-linear or complex layers, we are no sure whether this layer satisfies $L(x, W_0)+L(x, BA) = L(x, W_0+BA)$. Hence, it is difficult to extend LoRA to some complex layers by using ``loralib``. On the contrary, the idea of merging weights first in ``loratorch`` is more general and extensible. You just call ``merge_lora_param()`` in ``loratorch`` to merge weights and then call ``forward()`` in the original layer to compute the results. With the help of ``loratorch``, you can easily implement LoRA to any type of layer of ``torch.nn``.
+``loralib`` computes $xW_0^\top$ and $x(BA)^\top$ respectively and then merges the results. 
+While ``loratorch`` merges pre-trained weight $W_0$ and its LoRA weight $BA$ and then computes the results by simply using ``nn.Linear.forward()``. There is no difference between ``loralib`` and ``loratorch`` in the linear layers. But in some no-linear or complex layers, we are no sure whether this layer satisfies $L(x, W_0)+L(x, BA) = L(x, W_0+BA)$. Hence, it is difficult to extend LoRA to some complex layers by using ``loralib``. On the contrary, the idea of merging weights first in ``loratorch`` is more general and extensible. You just call ``merge_lora_param()`` in ``loratorch`` to merge weights and then call ``forward()`` in the original layer to compute the results. With the help of ``loratorch``, you can easily implement LoRA to any type of layer of ``torch.nn``.
 
 ## Supported Layers
 
@@ -55,7 +54,6 @@ where $x\in\mathbb{R}^{k\times n}$ is the input matrix, $W_0\in\mathbb{R}^{m\tim
 | ``MergedLinear``          | ✓ (Error)      | ✓              | [mergedlinear.ipynb](https://github.com/Baijiong-Lin/LoRA-Torch/blob/main/examples/mergedlinear.ipynb) |
 | $\cdots$                  | hard to extend | easy to extend |                                                    |
 
-*We compare the results of ``loralib`` and ``loratorch``  in [examples](./examples) to demonstrate the correctness of the implementation in ``loratorch``.*
 
 ## Quick Start
 
@@ -154,6 +152,13 @@ i am providing Tool that are ready-to-use for Quantize the model:
 ## What's the best way to use this repository?
 
 Go over to the Transfomer-Based-specific directory that you are interested in, and open the ```README.md```. We have included details about the LLMs, followed by performance results on open-source datasets!
+
+### Methods Supports Quantization 
+the supports method for Quantize the Transfomer-Based Models 
+
+- [x] LoRa
+- [x] LoRaTorch
+- [x] QLoRA
 
 ## Roadmap
 

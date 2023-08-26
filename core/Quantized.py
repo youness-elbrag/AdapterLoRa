@@ -25,25 +25,27 @@ class AdapterLoRa(nn.Module):
         self.LORA = LoRa
         self.BITSAND = BitSand
         self.model = model
-        self.layer = []
+        self.Instance_Layer = []
+        self.layertyep = []
 
         if method in self.Adapters:
             self.method = self.Adapters[method]
         else:
             raise ValueError("Invalid method provided")
 
-    def add_layer(self, layer: str):
+    def add_layer_and_Instance_Layer(self,layertyep:str ,layer: str):
         """
         Add a layer to the list of layers to be adapted.
 
         Args:
             layer (str): The name of the layer to add.
-
+            layerTyep(str): The layer nn.Linear or nn.Embedding to Adjust 
         Returns:
             list: The updated list of layers.
         """
-        self.layer.append(layer)
-        return self.layer
+        self.Instance_Layer.append(layer)
+        self.layertyep.append(layertyep)
+        return self.layertyep  , self.Instance_Layer 
 
     def freeze_weights(self, weight_freeze=False):
         """
@@ -63,7 +65,7 @@ class AdapterLoRa(nn.Module):
         self.model.gradient_checkpointing_enable()
         self.model.encoder, self.model.decoder = CastOutputToFloat(), CastOutputToFloat()
 
-    def reconstruct_model(self):
+    def reconstruct_model(self,verbose=False):
         """
         Reconstruct the model using LoRA-adapted layers.
 
@@ -73,9 +75,13 @@ class AdapterLoRa(nn.Module):
         if not isinstance(self.model, nn.Module):
             return "Please make sure the model is based on Torch nn.Module"
 
-        if self.LORA:
+        if self.LORA is not None:
             make_lora_replace(self.model, self.lora_layer, self.Rank, self.layer)
             return "Model successfully reconstructed with LoRA-adapted layers"
+        if self.BITSAND is not None:
+            make_lora_replace(self.model, self.lora_layer, self.Rank, self.layer)
+            return "Model successfully reconstructed with LoRA-adapted layers"
+
 
     def implement_lora(self,verbose=False):
         """
