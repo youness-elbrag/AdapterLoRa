@@ -6,6 +6,7 @@ from typing import Optional
 from .Quantized import AdapterLoRa
 
 LAYERS = AdapterLoRa.layertyep
+print(LAYERS)
 
 def Layer(model, new_layer):
     """

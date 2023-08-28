@@ -9,22 +9,31 @@ class CastOutputToFloat(nn.Module):
         return x.to(torch.float32)
 
 class AdapterLoRa(nn.Module):
+
+    class LoRaConfig(object):
+        def __init__(self):
+            self.method = None
+            self.Adapters = ["LoRa", "SandBytes", "LoRaTorch"]
+            self.Rank = None
+            self.model = None
+            self.Instance_Layer = []
+            self.layertyep = []
+            self.QMODEL = None
+            self.LORA = None
+            self.BITSAND = None
+
+        def SetMethod(self, method):
+             if method in self.Adapters:
+                self.method = method
+             else:
+                raise ValueError("Invalid method provided")
+        def
+
+
+
     def __init__(self, model: nn.Module, method: str, Rank: int, *args, **kwargs):
         super(AdapterLoRa, self).__init__()
-
-        self.Adapters = ["LoRa", "SandBytes", "LoRaTorch"]
-        self.Rank = Rank
-        self.model = model
-        self.Instance_Layer = []
-        self.layertyep = []
-        self.QMODEL = None
-        self.LORA = None
-        self.BITSAND = None
-
-        if method in self.Adapters:
-            self.method = method
-        else:
-            raise ValueError("Invalid method provided")
+        
 
         self.extra_args = args
         self.extra_kwargs = kwargs
@@ -51,8 +60,8 @@ class AdapterLoRa(nn.Module):
             model=self.model,
             method=self.method,
             LayerType=self.layertyep,
-            quantize_fn=LoRaLinear if self.method == "LoRa" else None,
-            quantize_fn_=LoRaEmbedding if self.method == "LoRa" else None,
+            quantize_fn=LoRaLinear,
+            quantize_fn_=LoRaEmbedding,
             Rank=self.Rank,
             layers=self.Instance_Layer,
             *self.extra_args,
@@ -66,12 +75,12 @@ class AdapterLoRa(nn.Module):
             print(f"Total trainable parameters before LoRA: {total_trainable_params_before}")
 
         if self.method == "LoRa":
-            self.LORA.mark_only_lora_as_trainable(self.QMODEL)
+             self.LORA.mark_only_lora_as_trainable(self.QMODEL)
         elif self.method == "LoRaTorch":
             loraT.mark_only_lora_as_trainable(self.QMODEL)
         elif self.method == "SandBytes":
-            return self.QMODEL
-
+             self.QMODEL
+        
         total_trainable_params_after = sum(p.numel() for p in self.QMODEL.parameters() if p.requires_grad)
         
         if verbose:

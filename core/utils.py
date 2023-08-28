@@ -38,10 +38,6 @@ def quantize_layer(**kwargs):
                 method=method,
                 model=model,
                 Rank=Rank,
-                lora_alpha=lora_alpha,
-                scale_grad_by_freq=scale_grad_by_freq,
-                padding_idx=padding_idx,
-                max_norm=max_norm,
                 **kwargs
             )
 
@@ -49,7 +45,7 @@ def quantize_layer(**kwargs):
 
 
 def make_lora_replace(
-    model, method: str, LayerType, quantize_fn=None, quantize_fn_=None, Rank=0, layers=None,
+    model, method: str, quantize_fn=None, quantize_fn_=None, Rank=0,lora_alpha=None, layers=None,
     depth=1, path="", verbose=True
 ):
     """
@@ -69,12 +65,11 @@ def make_lora_replace(
     Returns:
         nn.Module: The modified model with specified layers quantized using LoRA.
     """
-    AdaptersLayer = ["nn.Linear", "nn.Embedding"]
 
     if depth > 10:
         return model
 
-    if LayerType[0] in AdaptersLayer and isinstance(model, nn.Linear) and any(item in path for item in layers):
+    if isinstance(model, nn.Linear) and any(item in path for item in layers):
         if verbose:
             print(f"Found linear layer to quantize: {path}", type(model))
         if quantize_fn is not None:
@@ -84,18 +79,14 @@ def make_lora_replace(
                 Rank=Rank
             )
 
-    if LayerType[1] in AdaptersLayer and isinstance(model, nn.Embedding) and any(item in path for item in layers):
+    if isinstance(model, nn.Embedding) and any(item in path for item in layers):
         if verbose:
             print(f"Found embedding layer to quantize: {path}", type(model))
         if quantize_fn_ is not None:
             return quantize_fn_(
                 method=method,
                 model=model,
-                Rank=Rank,
-                lora_alpha=lora_alpha,
-                scale_grad_by_freq=scale_grad_by_freq,
-                padding_idx=padding_idx,
-                max_norm=max_norm
+                Rank=Rank
             )
 
     for key, module in model.named_children():
