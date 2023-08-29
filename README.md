@@ -1,4 +1,4 @@
-# Adapter-LoRa for Quantization  
+# Adapter-LoRa Beta Version Quantization  
 
 <div align="center">
   <img src="assets/LoRa.png" alt="LoRa-Logo" width="200">
